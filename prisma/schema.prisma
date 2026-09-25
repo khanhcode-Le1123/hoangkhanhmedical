@@ -7,84 +7,302 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole { PATIENT STAFF ADMIN }
-enum AppointmentStatus { PENDING CONFIRMED COMPLETED CANCELLED }
-
-model User {
-  id           String        @id @default(cuid())
-  email        String        @unique
-  phone        String?       @unique
-  name         String
-  role         UserRole      @default(PATIENT)
-  appointments Appointment[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+enum UserRole {
+  ADMIN
+  EDITOR
+  DOCTOR
+  PATIENT
 }
 
-model Specialty {
-  id          String     @id @default(cuid())
-  slug        String     @unique
-  name        String
-  description String
-  doctors     Doctor[]
-  services    Service[]
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum SlotStatus {
+  AVAILABLE
+  HELD
+  BOOKED
+  BLOCKED
+}
+
+enum ContactStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  SPAM
+}
+
+model User {
+  id String @id @default(cuid())
+  email String? @unique
+  phone String? @unique
+  name String
+  passwordHash String
+  role UserRole @default(PATIENT)
+  active Boolean @default(true)
+  patient Patient?
+  doctor Doctor?
+  authoredArticles Article[] @relation("ArticleAuthor")
+  reviewedArticles Article[] @relation("ArticleReviewer")
+  notifications Notification[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Patient {
+  id String @id @default(cuid())
+  userId String @unique
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dateOfBirth DateTime?
+  gender String?
+  address String?
+  appointments Appointment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Doctor {
-  id          String        @id @default(cuid())
-  slug        String        @unique
-  name        String
-  title       String
-  bio         String
-  specialtyId String
-  specialty   Specialty     @relation(fields: [specialtyId], references: [id])
-  schedules   Schedule[]
+  id String @id @default(cuid())
+  userId String? @unique
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  slug String @unique
+  name String
+  degree String?
+  title String?
+  bio String?
+  imageUrl String?
+  experienceSummary String?
+  expertise String[]
+  education String[]
+  certifications String[]
+  career String[]
+  strengths String[]
+  isPublished Boolean @default(false)
+  specialties DoctorSpecialty[]
+  services DoctorService[]
+  schedules DoctorSchedule[]
+  slots AppointmentSlot[]
   appointments Appointment[]
+  articleLinks ArticleDoctor[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Specialty {
+  id String @id @default(cuid())
+  slug String @unique
+  name String
+  eyebrow String?
+  description String
+  heroImageUrl String?
+  conditions String[]
+  symptoms String[]
+  audiences String[]
+  diagnostics String[]
+  technologies String[]
+  process String[]
+  isPublished Boolean @default(false)
+  doctors DoctorSpecialty[]
+  services ServiceSpecialty[]
+  faqs FAQ[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Service {
-  id          String       @id @default(cuid())
-  slug        String       @unique
-  name        String
+  id String @id @default(cuid())
+  slug String @unique
+  name String
+  category String
   description String
-  price       Int?
-  specialtyId String?
-  specialty   Specialty?   @relation(fields: [specialtyId], references: [id])
+  priceFrom Int?
+  priceTo Int?
+  priceNote String?
+  suitableFor String[]
+  indications String[]
+  contraindications String[]
+  preparation String[]
+  process String[]
+  durationMinutes Int?
+  expectedResult String?
+  isPublished Boolean @default(false)
+  doctors DoctorService[]
+  specialties ServiceSpecialty[]
   appointments Appointment[]
+  faqs FAQ[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model Schedule {
-  id        String   @id @default(cuid())
-  doctorId  String
-  doctor    Doctor   @relation(fields: [doctorId], references: [id])
-  startsAt  DateTime
-  endsAt    DateTime
-  available Boolean  @default(true)
+model DoctorSpecialty {
+  doctorId String
+  specialtyId String
+  isPrimary Boolean @default(false)
+  doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  specialty Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+  @@id([doctorId, specialtyId])
+}
+
+model DoctorService {
+  doctorId String
+  serviceId String
+  doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  @@id([doctorId, serviceId])
+}
+
+model ServiceSpecialty {
+  serviceId String
+  specialtyId String
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  specialty Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+  @@id([serviceId, specialtyId])
+}
+
+model DoctorSchedule {
+  id String @id @default(cuid())
+  doctorId String
+  doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  weekday Int
+  startsAt String
+  endsAt String
+  slotMinutes Int @default(30)
+  timezone String @default("Asia/Ho_Chi_Minh")
+  active Boolean @default(true)
+  validFrom DateTime?
+  validUntil DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([doctorId, weekday, active])
+}
+
+model AppointmentSlot {
+  id String @id @default(cuid())
+  doctorId String
+  doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  startsAt DateTime
+  endsAt DateTime
+  status SlotStatus @default(AVAILABLE)
+  holdToken String? @unique
+  holdExpiresAt DateTime?
+  appointment Appointment?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([doctorId, startsAt])
+  @@index([doctorId, startsAt, status])
 }
 
 model Appointment {
-  id          String            @id @default(cuid())
-  code        String            @unique
-  patientId   String
-  patient     User              @relation(fields: [patientId], references: [id])
-  doctorId    String
-  doctor      Doctor            @relation(fields: [doctorId], references: [id])
-  serviceId   String?
-  service     Service?          @relation(fields: [serviceId], references: [id])
-  startsAt    DateTime
-  note        String?
-  status      AppointmentStatus @default(PENDING)
-  createdAt   DateTime          @default(now())
+  id String @id @default(cuid())
+  code String @unique
+  patientId String
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  doctorId String
+  doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Restrict)
+  serviceId String?
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  slotId String @unique
+  slot AppointmentSlot @relation(fields: [slotId], references: [id], onDelete: Restrict)
+  status AppointmentStatus @default(PENDING)
+  reason String?
+  preparation String?
+  cancelledAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([patientId, status, createdAt])
+  @@index([doctorId, status, createdAt])
+}
+
+model ArticleCategory {
+  id String @id @default(cuid())
+  slug String @unique
+  name String
+  description String?
+  articles Article[]
 }
 
 model Article {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  excerpt     String
-  content     String
-  category    String
+  id String @id @default(cuid())
+  slug String @unique
+  title String
+  excerpt String
+  coverUrl String?
+  content String
+  toc Json?
+  references Json?
+  disclaimer String?
+  categoryId String
+  category ArticleCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  authorId String?
+  author User? @relation("ArticleAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  reviewerId String?
+  reviewer User? @relation("ArticleReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  relatedDoctors ArticleDoctor[]
   publishedAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([categoryId, publishedAt])
+}
+
+model ArticleDoctor {
+  articleId String
+  doctorId String
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  @@id([articleId, doctorId])
+}
+
+model FAQ {
+  id String @id @default(cuid())
+  category String
+  question String
+  answer String
+  sortOrder Int @default(0)
+  published Boolean @default(false)
+  specialtyId String?
+  specialty Specialty? @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+  serviceId String?
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([category, published, sortOrder])
+}
+
+model ContactSubmission {
+  id String @id @default(cuid())
+  fullName String
+  phone String
+  email String?
+  topic String
+  message String
+  privacyConsent Boolean
+  status ContactStatus @default(NEW)
+  ipHash String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([status, createdAt])
+}
+
+model Notification {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title String
+  body String
+  href String?
+  readAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([userId, readAt, createdAt])
+}
+
+model SiteSetting {
+  id String @id @default(cuid())
+  key String @unique
+  value Json
+  public Boolean @default(false)
+  updatedAt DateTime @updatedAt
 }

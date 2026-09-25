@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, CalendarDays, Menu, Phone, Search, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import gsap from 'gsap';
@@ -16,7 +16,9 @@ export function Brand({ light = false }: { light?: boolean }) {
 
 function Header() {
   const [open, setOpen] = useState(false);
-  return <header className="site-header">
+  const [scrolled,setScrolled]=useState(false);
+  useEffect(()=>{const onScroll=()=>setScrolled(window.scrollY>24);onScroll();window.addEventListener('scroll',onScroll,{passive:true});return()=>window.removeEventListener('scroll',onScroll)},[]);
+  return <header className={`site-header ${scrolled?'is-scrolled':''}`}>
     <div className="header-inner">
       <Brand />
       <nav className="desktop-nav" aria-label="Điều hướng chính">
@@ -25,10 +27,10 @@ function Header() {
       <div className="header-actions">
         <Link href="/tim-kiem" className="icon-button" aria-label="Tìm kiếm"><Search size={19} /></Link>
         <Link href="/dat-lich" className="button button-dark"><CalendarDays size={18} /> Đặt lịch</Link>
-        <button className="menu-button" aria-label="Mở menu" onClick={() => setOpen(true)}><Menu /></button>
+        <button className="menu-button" aria-label="Mở menu" aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setOpen(true)}><Menu /></button>
       </div>
     </div>
-    <AnimatePresence>{open && <motion.div className="mobile-menu" initial={{opacity:0,y:-16}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-16}}>
+    <AnimatePresence>{open && <motion.div id="mobile-navigation" className="mobile-menu" role="dialog" aria-modal="true" aria-label="Điều hướng di động" initial={{opacity:0,y:-16}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-16}}>
       <div className="mobile-menu-top"><Brand light /><button aria-label="Đóng menu" onClick={() => setOpen(false)}><X /></button></div>
       <nav>{nav.map(([label, href], i) => <motion.div key={href} initial={{opacity:0,x:20}} animate={{opacity:1,x:0}} transition={{delay:.05*i}}><Link href={href} onClick={() => setOpen(false)}>{label}<ArrowUpRight /></Link></motion.div>)}</nav>
       <Link href="/dat-lich" className="button button-lime">Đặt lịch khám</Link>
@@ -49,28 +51,32 @@ function Footer() {
       <div><b>Hỗ trợ</b><Link href="/faq">Câu hỏi thường gặp</Link><Link href="/benh-nhan">Dành cho bệnh nhân</Link><Link href="/lich-hen">Quản lý lịch hẹn</Link></div>
       <div><b>Liên hệ</b><a href="tel:0914010104">0914 010 104</a><span>621 Hùng Vương, Chư Sê, Gia Lai</span><span>Hằng ngày · 07:00–19:00</span></div>
     </div>
-    <div className="footer-bottom"><span>© 2026 Hoàng Khanh Medical</span><span>Thiết kế vì sự an tâm của người bệnh.</span></div>
+    <div className="footer-bottom"><span>© 2026 Hoàng Khanh Medical</span><span className="legal-links"><Link href="/chinh-sach-bao-mat">Bảo mật</Link><Link href="/dieu-khoan-su-dung">Điều khoản</Link><Link href="/chinh-sach-dat-lich">Đặt lịch</Link></span></div>
   </footer>;
 }
 
 export function SiteShell({ children, bare = false }: { children: React.ReactNode; bare?: boolean }) {
+  const progressRef=useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (typeof window === 'undefined') return;
     gsap.registerPlugin(ScrollTrigger);
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduce) return;
     const lenis = new Lenis({ duration: 1.05, smoothWheel: true });
+    const updateProgress=()=>{const max=document.documentElement.scrollHeight-window.innerHeight;const value=max>0?window.scrollY/max:0;if(progressRef.current)progressRef.current.style.transform=`scaleX(${value})`};
+    window.addEventListener('scroll',updateProgress,{passive:true});updateProgress();
     let frame = 0;
     const raf = (time:number) => { lenis.raf(time); frame = requestAnimationFrame(raf); };
     frame = requestAnimationFrame(raf);
     const ctx = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => gsap.fromTo(el,{opacity:0,y:36},{opacity:1,y:0,duration:.9,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%',once:true}}));
       gsap.utils.toArray<HTMLElement>('[data-parallax]').forEach((el) => gsap.to(el,{yPercent:10,ease:'none',scrollTrigger:{trigger:el,start:'top bottom',end:'bottom top',scrub:true}}));
+      gsap.utils.toArray<HTMLElement>('[data-image-reveal]').forEach((el) => gsap.fromTo(el,{clipPath:'inset(12% 0 12% 0)',scale:1.06},{clipPath:'inset(0% 0 0% 0)',scale:1,duration:1.2,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 86%',once:true}}));
     });
-    return () => { cancelAnimationFrame(frame); lenis.destroy(); ctx.revert(); };
+    return () => { window.removeEventListener('scroll',updateProgress);cancelAnimationFrame(frame); lenis.destroy(); ctx.revert(); };
   }, []);
   if (bare) return <>{children}</>;
-  return <><Header/><main>{children}</main><a href="tel:0914010104" className="floating-call"><Phone size={18}/><span>Gọi phòng khám</span></a><Footer/></>;
+  return <><div ref={progressRef} className="scroll-progress"/><Header/><main>{children}</main><a href="tel:0914010104" className="floating-call"><Phone size={18}/><span>Gọi phòng khám</span></a><Footer/></>;
 }
 
 export function PageHero({ eyebrow, title, copy }: { eyebrow:string; title:string; copy:string }) {

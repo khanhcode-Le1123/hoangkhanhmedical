@@ -33,7 +33,7 @@ export function HomePage() {
 
     <section className="numbers-band">
       <div className="container numbers-grid">
-        {[['10+','Năm đồng hành'],['06','Chuyên khoa'],['20+','Dịch vụ y tế'],['07:00–19:00','Mở cửa mỗi ngày']].map(([n,l])=><div key={l} data-reveal><strong>{n}</strong><span>{l}</span></div>)}
+        {[['10+','Năm đồng hành*'],['04','Chuyên khoa chính*'],['BSL-2','Theo website hiện tại*'],['07:00–19:00','Giờ niêm yết*']].map(([n,l])=><div key={l} data-reveal><strong>{n}</strong><span>{l}</span></div>)}
       </div>
     </section>
 
@@ -51,7 +51,7 @@ export function HomePage() {
     <section className="story-section">
       <div className="container story-grid">
         <div className="story-copy" data-reveal><p className="eyebrow light">Không gian chữa lành</p><h2>Y tế hiện đại vẫn có thể <em>ấm áp.</em></h2><p>Chúng tôi thiết kế từng điểm chạm để người bệnh thấy được tôn trọng: ít chờ đợi hơn, giải thích rõ ràng hơn và luôn có người đồng hành.</p><ul><li><Check/>Quy trình khám tinh gọn, dễ hiểu</li><li><Check/>Chi phí minh bạch trước khi thực hiện</li><li><Check/>Kết quả được lưu trữ và theo dõi</li></ul><Link href="/gioi-thieu" className="button button-lime">Câu chuyện của chúng tôi <ArrowRight/></Link></div>
-        <div className="story-media"><Image data-parallax src="/images/clinic-interior.png" fill alt="Không gian phòng khám Hoàng Khanh Medical" sizes="(max-width: 900px) 100vw, 55vw"/><div className="story-caption"><Sparkles/><span><b>Không gian premium</b><small>Riêng tư · An toàn · Dễ tiếp cận</small></span></div></div>
+        <div className="story-media" data-image-reveal><Image data-parallax src="/images/clinic-interior.png" fill alt="Không gian phòng khám Hoàng Khanh Medical" sizes="(max-width: 900px) 100vw, 55vw"/><div className="story-caption"><Sparkles/><span><b>Không gian khám</b><small>Riêng tư · An toàn · Dễ tiếp cận</small></span></div></div>
       </div>
     </section>
 

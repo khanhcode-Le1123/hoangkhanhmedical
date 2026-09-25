@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /benh-nhan
+Disallow: /lich-hen
+Disallow: /api/
+
+Sitemap: https://hoangkhanhmedical.vercel.app/sitemap.xml
