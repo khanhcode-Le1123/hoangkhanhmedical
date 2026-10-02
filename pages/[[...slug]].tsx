@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import type { GetServerSideProps } from 'next';
-import { HomePage } from '@/components/HomePage';
+import dynamic from 'next/dynamic';
+const HomePage = dynamic(() => import('@/components/HomePage').then(module => module.HomePage));
 import { SiteShell } from '@/components/SiteShell';
 import { AboutPage, AdminPage, BookingPage, ContactPage, DetailPage, LegalPage, ListingPage, PatientPage, SearchPage } from '@/components/InnerPages';
 import { articles, doctors, routePaths, services, specialties } from '@/lib/data';
