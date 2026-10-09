@@ -1,126 +1,90 @@
 import Image from 'next/image';
-import dynamic from 'next/dynamic';
-import { DoctorShowcase, EditorialJournal } from './EditorialContent';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
-import { ArrowDown, ArrowRight, ArrowUpRight, Check, Plus } from 'lucide-react';
-import { AnimatePresence, motion, useInView, useMotionValueEvent, useScroll, useSpring, useTransform, type MotionValue } from 'motion/react';
+import { ArrowRight, ArrowUpRight, CalendarDays, Check, Clock3, MapPin, Phone, ShieldCheck } from 'lucide-react';
+import { motion } from 'motion/react';
 import { services, specialties } from '@/lib/data';
+import { DoctorShowcase, EditorialJournal } from './EditorialContent';
 import { SectionHead } from './SiteShell';
-import { DepthSurface, ImageReveal, MagneticButton, RevealText } from './motion/Primitives';
-import { depthSpring, editorial, spring, useMotionMode } from './motion/system';
+import { spring, useMotionMode } from './motion/system';
 
-const SpatialGallery = dynamic(() => import('./SpatialGallery'), { loading: () => <div className="spatial-gallery" aria-hidden><figure/><figure/><figure/></div> });
+function HomeReveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+  const { reduced } = useMotionMode();
+  return <motion.div initial={reduced ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .16 }} transition={{ ...spring, delay }}>{children}</motion.div>;
+}
 
-const imagery = ['/images/doctor-hero.png', '/images/medical-team.png', '/images/clinic-interior.png'];
-const imageNote = 'Hình ảnh minh họa · Chưa xác nhận cơ sở thực tế';
-
-function CinematicHero() {
-  const ref = useRef<HTMLElement>(null); const { cinematic, reduced, pointer } = useMotionMode();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
-  const p = useSpring(scrollYProgress, depthSpring);
-  const scale = useTransform(p, [0, .8], [1, 1.17]);
-  const clipPath = useTransform(p, [0, .6], ['inset(0% 4% 0% 4% round 160px 160px 12px 12px)', 'inset(0% 0% 0% 0% round 12px 12px 12px 12px)']);
-  const copyY = useTransform(p, [0, .7], [0, -95]);
-  const opacity = useTransform(p, [0, .6], [1, 0]);
-  const floatY = useTransform(p, [0, 1], [0, -150]);
-  const imageY = useTransform(p, [0, 1], [0, 55]);
-  const px = useSpring(0, depthSpring), py = useSpring(0, depthSpring);
-  return <section ref={ref} className="cinema-hero" onPointerMove={event => { if (!pointer) return; const r = event.currentTarget.getBoundingClientRect(); px.set((event.clientX / r.width - .5) * 12); py.set((event.clientY / r.height - .5) * 8); }} onPointerLeave={() => { px.set(0); py.set(0); }}>
-    <div className="hero-coordinate" aria-hidden>GIA LAI, VIỆT NAM <span>14° N / 108° E</span></div>
-    <div className="hero-halo" aria-hidden/>
-    <div className="cinema-hero-grid container">
-      <motion.div className="cinema-copy" style={cinematic ? { y: copyY, opacity } : {}}>
-        <motion.p className="eyebrow" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .1 }}>Hoàng Khanh Medical · Phòng khám chuyên khoa</motion.p>
-        <h1><RevealText>Chuyên môn.</RevealText><RevealText delay={.12}>Sự thấu hiểu.</RevealText><RevealText delay={.24}><em>Vì bạn.</em></RevealText></h1>
-        <motion.div initial={reduced ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: .4 }}><p className="cinema-intro">Chăm sóc sức khỏe bắt đầu từ lắng nghe.<br/>Tìm chuyên khoa, gặp bác sĩ và chủ động<br className="desktop-break"/> sắp xếp một cuộc hẹn cho chính mình.</p><div className="cinema-actions"><MagneticButton href="/dat-lich">Đặt lịch khám</MagneticButton><Link href="/chuyen-khoa" className="text-link">Tìm chuyên khoa <ArrowRight size={16}/></Link></div></motion.div>
-        <div className="hero-signature"><span className="tiny-cross">+</span><span>Y KHOA TẬN TÂM<br/><b>Gần bạn hơn, mỗi ngày.</b></span></div>
-      </motion.div>
-      <motion.div className="cinema-visual" style={cinematic ? { y: imageY } : {}}>
-        <motion.div className="hero-photo" style={cinematic ? { clipPath, x: px, y: py } : {}} initial={reduced ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={editorial}><motion.div className="image-fill" style={cinematic ? { scale } : {}}><Image src={imagery[0]} alt="Bác sĩ trong không gian y tế — hình ảnh minh họa" fill priority sizes="(max-width: 900px) 100vw, 55vw"/></motion.div><span className="image-disclaimer">Hình ảnh minh họa</span></motion.div>
-        <motion.div className="hero-float" style={cinematic ? { y: floatY } : {}} initial={reduced ? false : { scale: .85, y: 20 }} animate={{ scale: 1, y: 0 }} transition={{ ...spring, delay: .65 }}><span className="cross-outline">+</span><div><small>MỘT ĐIỂM CHẠM</small><b>Một người đồng hành.</b></div><span className="float-line"/></motion.div>
-        <span className="hero-vertical">LẮNG NGHE / THẤU HIỂU / ĐỒNG HÀNH</span>
-      </motion.div>
+function HomeHero() {
+  const { reduced } = useMotionMode();
+  return <section className="home-hero">
+    <div className="home-hero-grid container">
+      <div className="home-hero-copy">
+        <HomeReveal><p className="eyebrow">Hoàng Khanh Medical <span/> Phòng khám chuyên khoa</p></HomeReveal>
+        <HomeReveal delay={.04}><h1>Chăm sóc sức khỏe bắt đầu từ <em>lắng nghe.</em></h1></HomeReveal>
+        <HomeReveal delay={.08}><p className="home-hero-intro">Tìm hiểu chuyên khoa, đội ngũ và dịch vụ; chủ động chọn khung giờ khám phù hợp với bạn.</p></HomeReveal>
+        <HomeReveal delay={.12}><div className="home-hero-actions"><Link href="/dat-lich" className="button button-dark button-lg">Đặt lịch khám <ArrowUpRight aria-hidden="true" size={18}/></Link><Link href="/chuyen-khoa" className="home-text-link">Tìm chuyên khoa <ArrowRight aria-hidden="true" size={17}/></Link></div></HomeReveal>
+        <div className="home-hero-meta"><span><MapPin aria-hidden="true"/> 621 Hùng Vương, Chư Sê, Gia Lai</span><a href="tel:0914010104"><Phone aria-hidden="true"/> 0914 010 104</a></div>
+      </div>
+      <motion.figure className="home-hero-visual" initial={reduced ? false : { opacity: 0, scale: .98 }} animate={{ opacity: 1, scale: 1 }} transition={{ ...spring, delay: .12 }}>
+        <div className="home-hero-image"><Image src="/images/doctor-hero.png" alt="Hình minh họa hoạt động chăm sóc y tế" fill priority sizes="(max-width: 900px) 100vw, 48vw"/></div>
+        <figcaption><ShieldCheck aria-hidden="true"/><span>Ảnh minh họa; không phải bằng chứng về bác sĩ hoặc cơ sở thực tế.</span></figcaption>
+        <span className="home-visual-index" aria-hidden="true">HKM <i/> GIA LAI</span>
+      </motion.figure>
     </div>
-    <div className="hero-bottom container"><a href="#care-intro"><ArrowDown size={16}/> KHÁM PHÁ CÁCH CHÚNG TÔI CHĂM SÓC</a><span>621 Hùng Vương · Chư Sê · Gia Lai</span></div>
   </section>;
 }
 
-function RollingMetric({ value, label, detail }: { value: string; label: string; detail: string }) {
-  const ref = useRef<HTMLDivElement>(null); const seen = useInView(ref, { once: true, amount: .6 }); const { reduced } = useMotionMode();
-  return <div ref={ref} className="editorial-metric"><div className="metric-value" aria-label={value}>{value.split('').map((digit, i) => <span className="digit-window" aria-hidden key={i}><motion.span animate={{ y: seen || reduced ? '0%' : '-50%' }} transition={{ ...spring, delay: reduced ? 0 : i * .09 }}><span>{digit}</span><span>{digit}</span></motion.span></span>)}</div><h3>{label}</h3><p>{detail}</p><motion.i initial={{ scaleX: 0 }} animate={{ scaleX: seen ? 1 : 0 }} transition={editorial}/></div>;
+function ClinicFacts() {
+  return <section className="clinic-facts container" aria-label="Thông tin phòng khám">
+    <div><span className="fact-icon"><MapPin aria-hidden="true"/></span><p><small>Địa điểm</small><b>621 Hùng Vương<br/>Chư Sê, Gia Lai</b></p></div>
+    <div><span className="fact-icon"><Clock3 aria-hidden="true"/></span><p><small>Giờ tiếp nhận</small><b>Vui lòng gọi để xác nhận<br/>giờ khám phù hợp</b></p></div>
+    <div><span className="fact-icon"><CalendarDays aria-hidden="true"/></span><p><small>Đặt lịch trực tuyến</small><b>Chọn ngày và khung giờ<br/>còn trống trong hệ thống</b></p></div>
+  </section>;
 }
 
-function ManifestoLine({ children, progress, index }: { children: React.ReactNode; progress: MotionValue<number>; index: number }) {
-  const { reduced } = useMotionMode();
-  const color = useTransform(progress, [index * .16, index * .16 + .25], ['#a2afa5', '#163e31']);
-  const y = useTransform(progress, [index * .16, index * .16 + .25], [12, 0]);
-  return <motion.span style={reduced ? {} : { color, y }}>{children}</motion.span>;
-}
-function Manifesto() {
-  const ref = useRef<HTMLElement>(null); const { scrollYProgress } = useScroll({ target: ref, offset: ['start 85%', 'end 70%'] });
-  return <section id="care-intro" className="manifesto container" ref={ref}><div className="manifesto-meta"><span className="section-number">01 / TRIẾT LÝ CHĂM SÓC</span><p>Sức khỏe là một hành trình.<br/>Bạn không cần đi một mình.</p><Plus size={40} strokeWidth={1}/></div><h2>{['Chăm sóc y khoa', 'không chỉ là điều trị.', 'Đó là sự thấu hiểu,', 'chính xác,', 'và đồng hành.'].map((line, i) => <ManifestoLine key={line} progress={scrollYProgress} index={i}>{i === 4 ? <em>{line}</em> : line}</ManifestoLine>)}</h2></section>;
-}
-
-function SpecialtyPanel({ index, progress }: { index: number; progress: MotionValue<number> }) {
-  const item = specialties[index]; const { cinematic } = useMotionMode();
-  const center = index / (specialties.length - 1);
-  const scale = useTransform(() => 1 - Math.min(1, Math.abs(progress.get() - center) / .2) * .06);
-  const opacity = useTransform(() => 1 - Math.min(1, Math.abs(progress.get() - center) / .25) * .35);
-  return <motion.article className={`specialty-panel specialty-tone-${index % 3}`} style={cinematic ? { scale, opacity } : {}}><div className="specialty-panel-top"><span>0{index + 1}</span><small>{item.eyebrow}</small><item.icon strokeWidth={1}/></div><div className="specialty-panel-image"><Image src={imagery[index % 3]} alt={`${item.name} — hình ảnh minh họa`} fill sizes="(max-width: 900px) 80vw, 40vw"/><span>Hình ảnh minh họa</span></div><div className="specialty-panel-copy"><h3>{item.name}</h3><p>{item.desc}</p><Link href={`/chuyen-khoa/${item.slug}`} className="panel-link">Tìm hiểu chuyên khoa <ArrowUpRight/></Link></div></motion.article>;
-}
-function SpecialtiesGallery() {
-  const ref = useRef<HTMLElement>(null); const viewportRef = useRef<HTMLDivElement>(null); const trackRef = useRef<HTMLDivElement>(null);
-  const [travel, setTravel] = useState(0); const { cinematic } = useMotionMode();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] });
-  const x = useTransform(scrollYProgress, [0, 1], [0, -travel]);
-  useEffect(() => { const measure = () => { if (trackRef.current && viewportRef.current) setTravel(Math.max(0, trackRef.current.scrollWidth - viewportRef.current.clientWidth)); }; const observer = new ResizeObserver(measure); if (viewportRef.current) observer.observe(viewportRef.current); if (trackRef.current) observer.observe(trackRef.current); measure(); return () => observer.disconnect(); }, []);
-  return <section className={`horizontal-specialties ${cinematic ? 'is-cinematic' : ''}`} ref={ref} aria-label="Các chuyên khoa"><div className="specialties-sticky"><div className="container gallery-heading"><div><p className="eyebrow">02 / Chăm sóc đa chuyên khoa</p><h2>Đúng nơi.<br/><em>Đúng sự chăm sóc.</em></h2></div><div><p>Mỗi nhu cầu, một hướng tiếp cận riêng.</p><Link href="/chuyen-khoa" className="text-link">Tất cả chuyên khoa <ArrowUpRight/></Link><a className="skip-gallery" href="#facilities">Bỏ qua bộ sưu tập <ArrowDown size={13}/></a></div></div><div ref={viewportRef} className="specialty-window" tabIndex={0} aria-label="Bộ sưu tập chuyên khoa; cuộn hoặc vuốt để khám phá"><motion.div ref={trackRef} className="specialty-track" style={cinematic ? { x } : {}}>{specialties.map((s, i) => <SpecialtyPanel key={s.slug} index={i} progress={scrollYProgress}/>)}</motion.div></div><div className="gallery-progress container"><span>KHÁM PHÁ CHUYÊN KHOA</span><div><motion.i style={{ scaleX: cinematic ? scrollYProgress : 1 }}/></div><span>06</span></div></div></section>;
+function SpecialtyGrid() {
+  return <section className="home-specialties home-section container">
+    <SectionHead eyebrow="Chăm sóc đa chuyên khoa" title="Bắt đầu từ điều bạn đang cần." action={<Link href="/chuyen-khoa" className="home-text-link">Tất cả chuyên khoa <ArrowUpRight aria-hidden="true" size={17}/></Link>}/>
+    <div className="home-specialty-grid">
+      {specialties.map((specialty, index) => <HomeReveal key={specialty.slug} delay={index * .025}>
+        <Link href={`/chuyen-khoa/${specialty.slug}`} className={`home-specialty-card${index === 0 ? ' is-featured' : ''}`}>
+          <span className="home-card-number">0{index + 1}</span><span className="home-specialty-icon"><specialty.icon aria-hidden="true" strokeWidth={1.6}/></span>
+          <span className="home-specialty-content"><small>{specialty.eyebrow}</small><b>{specialty.name}</b><span>{specialty.desc}</span></span><ArrowUpRight className="home-card-arrow" aria-hidden="true" size={19}/>
+        </Link>
+      </HomeReveal>)}
+    </div>
+  </section>;
 }
 
-function Facilities() {
-  const ref = useRef<HTMLElement>(null); const { cinematic, reduced } = useMotionMode();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-  const p = useSpring(scrollYProgress, depthSpring);
-  const clipPath = useTransform(p, [0, .5], ['inset(0% 15% 0% 15% round 36px)', 'inset(0% 0% 0% 0% round 0px)']);
-  const scale = useTransform(p, [0, 1], [1.04, 1.14]); const y = useTransform(p, [0, 1], [30, -35]);
-  return <section id="facilities" ref={ref} className="facility-scene"><motion.div className="facility-frame" style={reduced ? {} : { clipPath }}><motion.div className="image-fill" style={cinematic ? { scale } : {}}><Image src={imagery[2]} alt="Không gian phòng khám — hình ảnh minh họa" fill sizes="100vw"/></motion.div><div className="facility-shade"/><motion.div className="facility-caption container" style={cinematic ? { y } : {}}><p className="eyebrow light">03 / Không gian chăm sóc</p><h2>Một khoảng lặng.<br/><em>Để thấy an tâm.</em></h2><Link href="/gioi-thieu" className="text-link">Khám phá Hoàng Khanh <ArrowUpRight/></Link></motion.div><small className="facility-note">{imageNote}</small></motion.div></section>;
+function CareSteps() {
+  const steps = [
+    ['01', 'Chọn nhu cầu', 'Tìm chuyên khoa và bác sĩ phù hợp với nhu cầu thăm khám.', '/chuyen-khoa'],
+    ['02', 'Chọn thời gian', 'Xem khung giờ hiện có và chọn lịch thuận tiện cho bạn.', '/dat-lich'],
+    ['03', 'Xác nhận lịch', 'Kiểm tra lại lựa chọn trước khi gửi yêu cầu đặt lịch.', '/dat-lich'],
+  ];
+  return <section className="home-care-band"><div className="container home-care-layout">
+    <div className="home-care-intro"><p className="eyebrow light">Một hành trình rõ ràng</p><h2>Từng bước nhỏ,<br/><em>chủ động hơn.</em></h2><p>Thông tin và các bước đặt lịch được trình bày trước khi bạn xác nhận.</p><Link href="/dat-lich" className="button button-lime">Bắt đầu đặt lịch <ArrowUpRight aria-hidden="true" size={18}/></Link></div>
+    <ol className="home-care-steps">{steps.map(([number, title, copy, href]) => <li key={number}><span>{number}</span><div><h3>{title}</h3><p>{copy}</p><Link href={href} aria-label={`${title} — xem chi tiết`}>Xem bước này <ArrowRight aria-hidden="true" size={16}/></Link></div><Check aria-hidden="true" className="home-step-check"/></li>)}</ol>
+  </div></section>;
 }
 
-const chapters = [
-  ['Đặt lịch', 'Bắt đầu theo cách của bạn.', 'Chọn chuyên khoa, bác sĩ và khung giờ khả dụng. Kiểm tra thông tin trước khi gửi yêu cầu.', 'Chọn lịch phù hợp', imagery[0]],
-  ['Tiếp nhận', 'Được lắng nghe ngay từ đầu.', 'Chia sẻ lý do khám, thông tin cần thiết và các kết quả đã có để chuẩn bị cho buổi gặp bác sĩ.', 'Chuẩn bị thông tin', imagery[2]],
-  ['Thăm khám', 'Hiểu rõ điều cơ thể đang nói.', 'Trao đổi cùng bác sĩ về triệu chứng và những điều bạn quan tâm. Cùng xác định bước tiếp theo.', 'Trao đổi cùng bác sĩ', imagery[0]],
-  ['Chẩn đoán', 'Mỗi chỉ định, một lý do.', 'Xét nghiệm và chẩn đoán hình ảnh được cân nhắc theo tình trạng cụ thể. Hãy xác nhận cách chuẩn bị và chi phí.', 'Theo chỉ định chuyên môn', imagery[1]],
-  ['Theo dõi', 'Sự chăm sóc còn tiếp nối.', 'Ghi nhớ hướng dẫn, lịch tái khám và cách liên hệ khi cần giải đáp sau buổi khám.', 'Đồng hành sau buổi khám', imagery[2]],
-];
-function CareJourney() {
-  const ref = useRef<HTMLElement>(null); const [active, setActive] = useState(0); const { cinematic, reduced } = useMotionMode();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 25%', 'end 80%'] });
-  useMotionValueEvent(scrollYProgress, 'change', p => setActive(Math.min(4, Math.floor(p * 5))));
-  return <section className="care-journey container" ref={ref}><div className="care-stage"><p className="eyebrow">04 / Hành trình chăm sóc</p><h2>Từng bước rõ ràng.<br/><em>Từng lần an tâm.</em></h2><div className="care-stage-image"><AnimatePresence initial={false} mode="sync"><motion.div className="care-image-layer" key={cinematic ? active : 0} initial={reduced ? false : { clipPath: 'inset(100% 0% 0% 0%)', scale: 1.06 }} animate={{ clipPath: 'inset(0% 0% 0% 0%)', scale: 1 }} exit={{ opacity: 0, scale: .98 }} transition={{ ...editorial, duration: .6 }}><Image src={chapters[cinematic ? active : 0][4]} alt="Hành trình chăm sóc — hình ảnh minh họa" fill sizes="(max-width: 900px) 100vw, 45vw"/><div className="care-image-overlay"><span>0{(cinematic ? active : 0) + 1}</span><b>{chapters[cinematic ? active : 0][3]}</b></div></motion.div></AnimatePresence><small className="image-disclaimer">Hình ảnh minh họa</small></div><div className="care-track"><motion.i style={{ scaleX: reduced ? 1 : scrollYProgress }}/></div></div><div className="care-chapters">{chapters.map(([label, title, body], i) => <article key={label} className={active === i ? 'active' : ''}><span className="chapter-index">0{i + 1} <i/> {label}</span><h3>{title}</h3><p>{body}</p>{i === 0 && <Link href="/dat-lich" className="text-link">Bắt đầu đặt lịch <ArrowUpRight size={17}/></Link>}</article>)}</div></section>;
+function ServiceGrid() {
+  return <section className="home-services home-section container">
+    <SectionHead eyebrow="Dịch vụ y tế" title="Thông tin trước khi bạn lựa chọn." action={<Link href="/dich-vu" className="home-text-link">Tất cả dịch vụ <ArrowUpRight aria-hidden="true" size={17}/></Link>}/>
+    <div className="home-service-grid">{services.slice(0, 4).map((service, index) => <HomeReveal key={service.slug} delay={index * .03}><Link className="home-service-card" href={`/dich-vu/${service.slug}`}>
+      <span className="home-service-top"><span>{service.category}</span><ArrowUpRight aria-hidden="true" size={18}/></span><service.icon aria-hidden="true" className="home-service-icon" strokeWidth={1.5}/><h3>{service.name}</h3><p>{service.desc}</p><span className="home-service-price">{service.price}</span>
+    </Link></HomeReveal>)}</div>
+  </section>;
 }
 
-
-function DeferredSpatialGallery() {
-  const ref = useRef<HTMLDivElement>(null);
-  const visible = useInView(ref, { once: true, margin: '700px' });
-  return <div ref={ref} className="spatial-gallery-boundary">{visible ? <SpatialGallery/> : <div className="spatial-gallery" aria-label="Bộ ảnh minh họa không gian"><figure/><figure/><figure/></div>}</div>;
+function BookingCallout() {
+  return <section className="home-booking-callout container"><div className="home-booking-copy"><p className="eyebrow">Dành cho bệnh nhân</p><h2>Đặt lịch theo cách <em>thuận tiện với bạn.</em></h2><p>Chọn chuyên khoa, bác sĩ, ngày và khung giờ; bạn sẽ kiểm tra lại thông tin trước khi xác nhận.</p><Link href="/dat-lich" className="button button-dark">Xem các bước đặt lịch <ArrowUpRight aria-hidden="true" size={18}/></Link></div><div className="home-booking-list" aria-label="Các bước trong quy trình đặt lịch"><div><span>01</span><b>Chuyên khoa & bác sĩ</b><Check aria-hidden="true"/></div><div><span>02</span><b>Ngày & khung giờ</b><Check aria-hidden="true"/></div><div><span>03</span><b>Kiểm tra trước khi gửi</b><ArrowRight aria-hidden="true"/></div><p><ShieldCheck aria-hidden="true"/> Lịch chỉ được gửi sau khi bạn chủ động xác nhận.</p></div></section>;
 }
-
-function Technology() {
-  const ref = useRef<HTMLElement>(null); const { reduced } = useMotionMode(); const { scrollYProgress } = useScroll({ target: ref, offset: ['start 80%', 'end 70%'] });
-  return <section ref={ref} className="technology-scene"><div className="container technology-heading"><p className="eyebrow light">06 / Khoa học & sự chăm sóc</p><h2>Chính xác trong từng bước.<br/><em>Tận tâm trong từng nhịp.</em></h2><p>Từ thăm khám đến xét nghiệm, mỗi kết quả cần được đặt trong bối cảnh sức khỏe của bạn.</p><Link href="/dich-vu/xet-nghiem-tong-quat" className="text-link">Tìm hiểu quy trình xét nghiệm <ArrowUpRight/></Link></div><svg className="medical-path" viewBox="0 0 1200 150" fill="none" aria-hidden><path d="M0 80H340L365 60L390 100L425 15L465 135L500 80H1200" stroke="currentColor" opacity=".15"/><motion.path d="M0 80H340L365 60L390 100L425 15L465 135L500 80H1200" stroke="currentColor" strokeWidth="2" style={{ pathLength: reduced ? 1 : scrollYProgress }}/></svg><DeferredSpatialGallery/><p className="technology-note">Bộ ảnh minh họa định hướng không gian · Không phải bằng chứng về cơ sở hoặc thiết bị thực tế.</p></section>;
-}
-
-function ServicesBento() {
-  return <section className="services-editorial container"><SectionHead eyebrow="07 / Dịch vụ y tế" title="Chủ động chăm sóc. Trọn vẹn mỗi ngày."/><div className="service-bento">{services.slice(0, 4).map((s, i) => <DepthSurface key={s.slug} className={`bento-item bento-${i}`}><Link href={`/dich-vu/${s.slug}`}><div className="bento-top"><small>{s.category}</small><ArrowUpRight/></div>{i === 0 && <ImageReveal src={imagery[2]} alt="Không gian thăm khám minh họa" className="bento-photo"/>}<div><s.icon size={30} strokeWidth={1}/><h3>{s.name}</h3><p>{s.desc}</p><small>{s.price}</small></div></Link></DepthSurface>)}</div></section>;
-}
-function PatientExperience() {
-  return <section className="patient-experience container"><div><p className="eyebrow">08 / Trải nghiệm của bạn</p><h2>Ít băn khoăn hơn.<br/><em>Chủ động nhiều hơn.</em></h2><p>Một nơi để bắt đầu đặt lịch và xem lại lịch hẹn. Các khung giờ được lấy từ hệ thống khi bạn lựa chọn.</p><MagneticButton href="/benh-nhan">Khám phá cổng bệnh nhân</MagneticButton></div><div className="patient-preview"><div className="preview-toolbar"><span className="tiny-cross">+</span><b>LỊCH HẸN CỦA BẠN</b><span>Giao diện minh họa</span></div><p>Bước đầu cho<br/><em>một ngày an tâm.</em></p>{['Chọn chuyên khoa phù hợp', 'Tìm bác sĩ đồng hành', 'Xác nhận ngày & giờ'].map((line, i) => <div className="preview-step" key={line}><span>0{i + 1}</span><b>{line}</b>{i < 2 ? <Check size={16}/> : <ArrowRight size={16}/>}</div>)}<Link href="/dat-lich" className="preview-link">Tạo lịch hẹn của bạn <ArrowUpRight/></Link></div></section>;
-}
-
 
 export function HomePage() {
-  return <div className="premium-home"><CinematicHero/><section className="editorial-metrics container" aria-label="Thông tin trên website"><RollingMetric value="06" label="Chuyên khoa" detail="Danh mục thông tin trên website"/><RollingMetric value="05" label="Bước chăm sóc" detail="Từ đặt lịch đến hướng dẫn theo dõi"/><RollingMetric value="01" label="Điều luôn hướng đến" detail="Sự an tâm của người bệnh"/></section><Manifesto/><SpecialtiesGallery/><Facilities/><CareJourney/><DoctorShowcase/><Technology/><ServicesBento/><PatientExperience/><section className="journal-editorial-section container"><SectionHead eyebrow="09 / Tạp chí sức khỏe" title="Hiểu cơ thể. Sống tốt hơn." action={<Link href="/tin-tuc" className="text-link">Tất cả bài viết <ArrowUpRight/></Link>}/><EditorialJournal/></section><section className="final-invitation"><div className="container"><p className="eyebrow">Sẵn sàng khi bạn cần</p><h2><RevealText>Một cuộc hẹn nhỏ.</RevealText><RevealText><em>Dành cho chính mình.</em></RevealText></h2><MagneticButton href="/dat-lich">Bắt đầu đặt lịch khám</MagneticButton><a href="tel:0914010104">Hoặc gọi 0914 010 104 <ArrowUpRight size={16}/></a></div></section></div>;
+  return <div className="premium-home home-redesign">
+    <HomeHero/><ClinicFacts/><SpecialtyGrid/><CareSteps/>
+    <section className="home-doctors-wrap"><div className="container home-section-label"><p className="eyebrow">Đội ngũ chuyên môn</p><p>Hồ sơ hiển thị theo dữ liệu hiện có; thông tin cần xác minh được ghi chú rõ.</p></div><DoctorShowcase/></section>
+    <ServiceGrid/><BookingCallout/>
+    <section className="home-journal home-section container"><SectionHead eyebrow="Kiến thức y khoa" title="Hiểu cơ thể, sống chủ động hơn." action={<Link href="/tin-tuc" className="home-text-link">Tất cả bài viết <ArrowUpRight aria-hidden="true" size={17}/></Link>}/><p className="home-draft-note">Các bài viết trên website hiện ở trạng thái bản nháp và cần được duyệt y khoa trước khi công bố.</p><EditorialJournal/></section>
+    <section className="home-final-cta"><div className="container"><div><p className="eyebrow light">Khi bạn cần được tư vấn</p><h2>Một cuộc hẹn bắt đầu<br/><em>bằng cuộc trò chuyện.</em></h2></div><div className="home-final-actions"><Link href="/dat-lich" className="button button-lime button-lg">Đặt lịch khám <ArrowUpRight aria-hidden="true" size={18}/></Link><a href="tel:0914010104"><Phone aria-hidden="true" size={18}/> Gọi 0914 010 104</a></div></div></section>
+  </div>;
 }

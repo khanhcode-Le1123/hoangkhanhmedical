@@ -17,16 +17,17 @@ export function Brand({ light = false }: { light?: boolean }) {
 function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled,setScrolled]=useState(false);
-  const [hidden, setHidden] = useState(false);
+  const router = useRouter();
   const { scrollY } = useScroll(); const { reduced } = useMotionMode();
   const menuRef = useRef<HTMLDialogElement>(null); const menuTrigger = useRef<HTMLButtonElement>(null);
-  useMotionValueEvent(scrollY, 'change', y => { setScrolled(y > 40); const delta = y - (scrollY.getPrevious() ?? y); if (Math.abs(delta) > 4) setHidden(y > 250 && delta > 0); });
+  const currentPath = router.asPath.split(/[?#]/)[0].replace(/\/$/, '') || '/';
+  useMotionValueEvent(scrollY, 'change', y => setScrolled(y > 40));
   useEffect(() => { if (!open) return; const dialog = menuRef.current; dialog?.showModal(); const returnFocus = menuTrigger.current; const prior = document.body.style.overflow; document.body.style.overflow = 'hidden'; return () => { dialog?.close(); document.body.style.overflow = prior; returnFocus?.focus(); }; }, [open]);
-  return <motion.header initial={reduced ? false : { y: -20, opacity: 0 }} animate={{ y: hidden && !open && !reduced ? -100 : 0, opacity: 1 }} transition={spring} className={`site-header ${scrolled?'is-scrolled':''}`}>
+  return <motion.header initial={reduced ? false : { y: -12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={spring} className={`site-header ${scrolled?'is-scrolled':''}`}>
     <div className="header-inner">
       <Brand />
       <nav className="desktop-nav" aria-label="Điều hướng chính">
-        {nav.map(([label, href]) => <Link key={href} href={href}>{label}</Link>)}
+        {nav.map(([label, href]) => <Link key={href} href={href} aria-current={currentPath === href || currentPath.startsWith(`${href}/`) ? 'page' : undefined}>{label}</Link>)}
       </nav>
       <div className="header-actions">
         <Link href="/tim-kiem" className="icon-button" aria-label="Tìm kiếm"><Search size={19} /></Link>
@@ -36,7 +37,7 @@ function Header() {
     </div>
     <AnimatePresence>{open && <motion.dialog ref={menuRef} onCancel={event => { event.preventDefault(); setOpen(false); }} id="mobile-navigation" className="mobile-menu" role="dialog" aria-modal="true" aria-label="Điều hướng di động" initial={{opacity:0,y:-16}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-16}}>
       <div className="mobile-menu-top"><Brand light /><button autoFocus aria-label="Đóng menu" onClick={() => setOpen(false)}><X /></button></div>
-      <nav>{nav.map(([label, href], i) => <motion.div key={href} initial={{opacity:0,x:20}} animate={{opacity:1,x:0}} transition={{delay:.05*i}}><Link href={href} onClick={() => setOpen(false)}>{label}<ArrowUpRight /></Link></motion.div>)}</nav>
+      <nav aria-label="Điều hướng di động">{nav.map(([label, href], i) => <motion.div key={href} initial={{opacity:0,x:20}} animate={{opacity:1,x:0}} transition={{delay:.05*i}}><Link href={href} aria-current={currentPath === href || currentPath.startsWith(`${href}/`) ? 'page' : undefined} onClick={() => setOpen(false)}>{label}<ArrowUpRight aria-hidden="true" /></Link></motion.div>)}<motion.div initial={{opacity:0,x:20}} animate={{opacity:1,x:0}} transition={{delay:.05*nav.length}}><Link href="/tim-kiem" aria-current={currentPath === '/tim-kiem' ? 'page' : undefined} onClick={() => setOpen(false)}>Tìm kiếm<Search aria-hidden="true"/></Link></motion.div></nav>
       <Link href="/dat-lich" onClick={() => setOpen(false)} className="button button-lime">Đặt lịch khám</Link>
     </motion.dialog>}</AnimatePresence>
   </motion.header>;
@@ -53,7 +54,7 @@ function Footer() {
       <div><Brand light/><p>Phòng khám chuyên khoa tại Chư Sê, Gia Lai. Thông tin chuyên môn cần được đối chiếu hồ sơ trước khi công bố.</p></div>
       <div><b>Khám phá</b>{nav.slice(0,4).map(([l,h])=><Link key={h} href={h}>{l}</Link>)}</div>
       <div><b>Hỗ trợ</b><Link href="/faq">Câu hỏi thường gặp</Link><Link href="/benh-nhan">Dành cho bệnh nhân</Link><Link href="/lich-hen">Quản lý lịch hẹn</Link></div>
-      <div><b>Liên hệ</b><a href="tel:0914010104">0914 010 104</a><span>621 Hùng Vương, Chư Sê, Gia Lai</span><span>Hằng ngày · 07:00–19:00</span></div>
+      <div><b>Liên hệ</b><a href="tel:0914010104">0914 010 104</a><span>621 Hùng Vương, Chư Sê, Gia Lai</span><span>Vui lòng gọi để xác nhận giờ tiếp nhận</span></div>
     </div>
     <p className="footer-wordmark" aria-hidden>Hoàng Khanh.</p><div className="footer-bottom"><span>© 2026 Hoàng Khanh Medical</span><span className="legal-links"><Link href="/chinh-sach-bao-mat">Bảo mật</Link><Link href="/dieu-khoan-su-dung">Điều khoản</Link><Link href="/chinh-sach-dat-lich">Đặt lịch</Link></span></div>
   </footer>;
@@ -62,9 +63,10 @@ function Footer() {
 export function SiteShell({ children, bare = false }: { children: React.ReactNode; bare?: boolean }) {
   const { scrollYProgress } = useScroll();
   const router = useRouter(); const { reduced } = useMotionMode();
+  const isHome = (router.asPath.split(/[?#]/)[0].replace(/\/$/, '') || '/') === '/';
   const content = <AnimatePresence initial={false} mode="wait"><motion.div className="route-stage" key={router.asPath.split('?')[0]} initial={reduced ? false : { opacity: 0, clipPath: 'inset(0 0 2% 0)' }} animate={{ opacity: 1, clipPath: 'inset(0 0 0% 0)' }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .18 }}>{children}</motion.div></AnimatePresence>;
   if (bare) return content;
-  return <><a className="skip-content" href="#main-content">Bỏ qua điều hướng</a><motion.div className="scroll-progress" style={{ scaleX: scrollYProgress }}/><Header/><main id="main-content" tabIndex={-1}>{content}</main><a href="tel:0914010104" className="floating-call" aria-label="Gọi phòng khám 0914 010 104"><Phone size={18}/><span>Gọi phòng khám</span></a><Footer/></>;
+  return <><a className="skip-content" href="#main-content">Bỏ qua điều hướng</a><motion.div className="scroll-progress" style={{ scaleX: scrollYProgress }}/><Header/><main id="main-content" tabIndex={-1}>{content}</main>{!isHome&&<a href="tel:0914010104" className="floating-call" aria-label="Gọi phòng khám 0914 010 104"><Phone size={18}/><span>Gọi phòng khám</span></a>}<Footer/></>;
 }
 
 export function PageHero({ eyebrow, title, copy }: { eyebrow:string; title:string; copy:string }) {

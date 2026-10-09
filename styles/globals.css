@@ -2,15 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-:root{--ink:#10221d;--green:#0b3d32;--jade:#2f745d;--mint:#d8efbd;--ivory:#f5f2ea;--paper:#fcfbf7;--line:rgba(16,34,29,.13);--muted:#64716c;--shadow:0 24px 60px rgba(16,34,29,.12);--radius:28px}
+:root{
+  /* Brand and semantic palette — legacy aliases below preserve current page colors. */
+  --color-primary-950:#0b3d32;--color-primary-800:#185244;--color-secondary-700:#2f745d;--color-secondary-100:#ddebe4;
+  --color-accent-400:#b7d978;--color-accent-100:#eaf3d8;--color-accent-soft:#d8efbd;--color-warm-400:#e6b85c;
+  --color-canvas:#fcfbf7;--color-canvas-editorial:#f8f9f4;--color-surface:#fff;--color-surface-soft:#f5f2ea;--color-surface-editorial:#e9eee3;--color-surface-warm:#f3efe5;
+  --color-text:#10221d;--color-text-editorial:#153e31;--color-text-muted:#64716c;--color-text-inverse:#fff;
+  --color-border:rgba(16,34,29,.13);--color-border-strong:#93a99f;--color-scrim:rgba(7,31,26,.72);--color-focus:#397d5c;--color-focus-inverse:#b7d978;
+  --color-success:#1f7a4d;--color-success-text:#225f34;--color-success-surface:#e7f7e8;--color-warning:#806500;--color-warning-border:#e2c979;--color-warning-surface:#fff9df;--color-danger:#8d2f22;--color-danger-surface:#fff0ed;--color-info:#1261a0;
+  /* Type roles and scale (px values); actual font files are self-hosted by next/font. */
+  --font-display:var(--font-be-vietnam-pro),sans-serif;--font-body:var(--font-noto-sans),sans-serif;
+  --text-xs:12px;--text-sm:14px;--text-base:16px;--text-md:18px;--text-lg:20px;--text-xl:24px;--text-2xl:32px;--text-3xl:40px;--text-4xl:48px;--text-5xl:64px;--text-display:clamp(48px,6vw,96px);
+  --leading-tight:1.1;--leading-heading:1.25;--leading-body:1.6;--leading-relaxed:1.75;--weight-regular:400;--weight-medium:500;--weight-semibold:600;--weight-bold:700;
+  /* 4px-based spacing scale. */
+  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--space-12:48px;--space-16:64px;--space-20:80px;--space-24:96px;--space-30:120px;
+  --container-width:1180px;--container-reading-width:760px;--container-wide-width:1440px;--container-gutter:24px;
+  --radius-sm:12px;--radius-md:18px;--radius-lg:28px;--radius-xl:36px;--radius-pill:999px;
+  --shadow-1:0 1px 2px rgba(11,61,50,.06);--shadow-2:0 12px 32px rgba(11,61,50,.09);--shadow-3:0 28px 72px rgba(11,61,50,.14);
+  --shadow-soft:0 24px 70px rgba(16,34,29,.09);--shadow-brand:0 24px 60px rgba(16,34,29,.12);
+  --motion-instant:120ms;--motion-fast:180ms;--motion-base:260ms;--motion-slow:420ms;--motion-editorial:600ms;
+  --z-base:0;--z-raised:10;--z-sticky:30;--z-header:50;--z-progress:80;--z-overlay:80;--z-modal:100;--z-urgent:120;
+  /* Informational viewport tokens; native CSS media queries still use literal values. */
+  --breakpoint-xs:375px;--breakpoint-sm:520px;--breakpoint-md:768px;--breakpoint-lg:1024px;--breakpoint-xl:1280px;--breakpoint-2xl:1440px;
+  /* Backward-compatible names retained to avoid a broad stylesheet rewrite. */
+  --ink:var(--color-text);--green:var(--color-primary-950);--jade:var(--color-secondary-700);--mint:var(--color-accent-soft);
+  --ivory:var(--color-surface-soft);--paper:var(--color-canvas);--line:var(--color-border);--muted:var(--color-text-muted);
+  --shadow:var(--shadow-brand);--radius:var(--radius-lg);--focus:var(--color-focus)
+}
 *{box-sizing:border-box}
+.app-fonts{display:contents;--font-display:var(--font-be-vietnam-pro),sans-serif;--font-body:var(--font-noto-sans),sans-serif;font-family:var(--font-noto-sans),sans-serif}
 html{scroll-behavior:smooth;background:var(--paper)}
-body{margin:0;color:var(--ink);background:var(--paper);font-family:Inter,Manrope,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+body{margin:0;color:var(--ink);background:var(--paper);font-family:var(--font-body);font-size:var(--text-base);line-height:var(--leading-body);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,h5,h6{font-family:var(--font-display)}
 a{text-decoration:none;color:inherit}
 button,input,select,textarea{font:inherit}
 button{color:inherit}
 main{overflow:hidden}
-.container{width:min(1180px,calc(100% - 48px));margin-inline:auto}
+.container{width:min(var(--container-width),calc(100% - var(--container-gutter)*2));margin-inline:auto}
 .eyebrow{margin:0 0 20px;text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:800;color:var(--jade)}
 .eyebrow.light{color:var(--mint)}
 .button{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 22px;border:0;border-radius:999px;font-size:14px;font-weight:750;cursor:pointer;transition:.3s ease}
@@ -75,7 +103,6 @@ main{overflow:hidden}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 
 /* Product-system additions */
-:root{--radius-sm:12px;--radius-md:18px;--radius-lg:28px;--shadow-soft:0 24px 70px rgba(16,34,29,.09);--focus:#a9d66f;--z-header:50;--z-progress:80}
 :where(a,button,input,select,textarea,summary):focus-visible{outline:3px solid var(--focus);outline-offset:3px}
 button:disabled{cursor:not-allowed;opacity:.55}
 .scroll-progress{position:fixed;inset:0 0 auto;height:3px;background:var(--mint);z-index:var(--z-progress);transform:scaleX(0);transform-origin:left center;will-change:transform}
@@ -90,3 +117,8 @@ button:disabled{cursor:not-allowed;opacity:.55}
 @media(max-width:520px){.legal-links{flex-wrap:wrap}.content-block h2{font-size:30px}.draft-banner{align-items:flex-start}.booking-success{align-items:flex-start;text-align:left}}
 @media(hover:none),(pointer:coarse){.listing-card:hover,.specialty-card:hover{transform:none!important}}
 @media(prefers-reduced-motion:reduce){.scroll-progress{display:none}.story-media{position:relative;top:auto}.site-header{transition:none}.faq-list summary svg{transition:none}}
+.medical-note p{font-family:var(--font-body)}
+.form-error,.error-state{background:var(--color-danger-surface);color:var(--color-danger)}
+.form-success{background:var(--color-success-surface);color:var(--color-success-text)}
+.draft-banner{border-color:var(--color-warning-border);background:var(--color-warning-surface)}
+.draft-banner svg{color:var(--color-warning)}

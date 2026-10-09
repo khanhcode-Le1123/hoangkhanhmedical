@@ -1,0 +1,281 @@
+/* Shared component contracts. Keep page composition and application state in their existing owners. */
+
+/* Buttons: legacy .button-dark/.button-lime aliases remain supported. */
+.button,
+.button-primary,
+.button-secondary,
+.button-outline,
+.button-ghost {
+  min-height: 48px;
+  padding-inline: var(--space-6);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1.2;
+  transition:
+    color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
+}
+
+.button-lg { min-height: 56px; padding-inline: var(--space-8); }
+.button-sm { min-height: 44px; padding-inline: var(--space-4); font-size: var(--text-xs); }
+
+.button-dark,
+.button-primary {
+  background: var(--color-primary-950);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-2);
+}
+
+.button-lime {
+  background: var(--color-accent-400);
+  color: var(--color-primary-950);
+}
+
+.button-secondary {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.button-outline,
+.button-ghost {
+  border-color: var(--color-border-strong);
+  background: transparent;
+  color: var(--color-primary-950);
+  box-shadow: none;
+}
+
+.button-ghost { border-color: transparent; }
+
+.button:active,
+.button-primary:active,
+.button-secondary:active,
+.button-outline:active,
+.button-ghost:active { transform: translateY(0); }
+
+.button:disabled,
+.button-primary:disabled,
+.button-secondary:disabled,
+.button-outline:disabled,
+.button-ghost:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+  pointer-events: none;
+  transform: none;
+  box-shadow: none;
+}
+
+.button:focus-visible,
+.button-primary:focus-visible,
+.button-secondary:focus-visible,
+.button-outline:focus-visible,
+.button-ghost:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .button:hover:not(:disabled),
+  .button-primary:hover:not(:disabled),
+  .button-secondary:hover:not(:disabled),
+  .button-outline:hover:not(:disabled),
+  .button-ghost:hover:not(:disabled) { transform: translateY(-1px); }
+
+  .button-dark:hover,
+  .button-primary:hover { background: var(--color-primary-800); box-shadow: var(--shadow-2); }
+  .button-lime:hover { background: var(--color-accent-100); }
+  .button-secondary:hover,
+  .button-ghost:hover { background: var(--color-surface-soft); }
+  .button-outline:hover { background: var(--color-secondary-100); }
+}
+
+.button:active:not(:disabled),
+.button-primary:active:not(:disabled),
+.button-secondary:active:not(:disabled),
+.button-outline:active:not(:disabled),
+.button-ghost:active:not(:disabled) { transform: translateY(0); }
+
+/* Native fields shared by booking, contact, and patient authentication forms. */
+.form-grid label,
+.contact-form label,
+.auth-page form label {
+  gap: var(--space-2);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea,
+.contact-form input,
+.contact-form select,
+.contact-form textarea,
+.auth-page input,
+.auth-page select,
+.auth-page textarea {
+  min-height: 48px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: var(--weight-regular) var(--text-base)/var(--leading-body) var(--font-body);
+  transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+}
+
+.form-grid textarea,
+.contact-form textarea,
+.auth-page textarea { min-height: 120px; }
+
+.form-grid input:focus-visible,
+.form-grid select:focus-visible,
+.form-grid textarea:focus-visible,
+.contact-form input:focus-visible,
+.contact-form select:focus-visible,
+.contact-form textarea:focus-visible,
+.auth-page input:focus-visible,
+.auth-page select:focus-visible,
+.auth-page textarea:focus-visible,
+.search-box input:focus-visible,
+.admin-search input:focus-visible {
+  border-color: var(--color-secondary-700);
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px var(--color-secondary-700);
+}
+
+.form-grid input:disabled,
+.form-grid select:disabled,
+.form-grid textarea:disabled,
+.contact-form input:disabled,
+.contact-form select:disabled,
+.contact-form textarea:disabled,
+.auth-page input:disabled { cursor: not-allowed; opacity: .55; }
+
+.consent input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  accent-color: var(--color-secondary-700);
+  cursor: pointer;
+}
+
+/* Existing card families share tokenized shape and elevation; only linked cards lift. */
+.listing-card,
+.service-mini,
+.patient-cards article,
+.appointment-list article,
+.admin-panel {
+  border-radius: var(--radius-md);
+}
+
+.listing-card {
+  border-color: var(--color-border);
+  transition: transform var(--motion-fast) ease, border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+}
+
+.service-mini {
+  border-color: var(--color-border);
+  transition: transform var(--motion-fast) ease, border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+}
+
+.patient-cards article { border: 1px solid var(--color-border); }
+.appointment-list article { border-color: var(--color-border); }
+.admin-panel { border: 1px solid var(--color-border); }
+.doctor-list a,
+.doctor-directory-row {
+  border-color: var(--color-border);
+  transition: color var(--motion-fast) ease, background-color var(--motion-fast) ease, border-color var(--motion-fast) ease, transform var(--motion-fast) ease;
+}
+.journal-story h3 { transition: color var(--motion-fast) ease; }
+
+@media (hover: hover) and (pointer: fine) {
+  .listing-card:hover,
+  .service-mini:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: var(--color-border-strong); }
+  .doctor-list a:hover { padding-left: 8px; transform: translateX(2px); background: var(--color-secondary-100); }
+  .doctor-directory-row:hover { transform: translateX(2px); color: var(--color-secondary-700); }
+  .journal-story:hover h3 { color: var(--color-secondary-700); }
+}
+
+/* Feedback remains textual and semantic; async behavior is owned by the existing forms. */
+.form-error,
+.error-state {
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-surface);
+  color: var(--color-danger);
+}
+
+.form-success {
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-sm);
+  background: var(--color-success-surface);
+  color: var(--color-success-text);
+}
+
+.empty-state {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+
+.draft-banner {
+  border-color: var(--color-warning-border);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-surface);
+}
+
+.booking-panel [role='status'],
+.section [role='status'] { color: var(--color-text-muted); }
+
+@media (hover: none), (pointer: coarse) {
+  .button:hover:not(:disabled),
+  .button-primary:hover:not(:disabled),
+  .button-secondary:hover:not(:disabled),
+  .button-outline:hover:not(:disabled),
+  .button-ghost:hover:not(:disabled),
+  .listing-card:hover,
+  .service-mini:hover,
+  .doctor-list a:hover,
+  .doctor-directory-row:hover { transform: none; }
+  .doctor-list a:hover { padding-left: 8px; background: transparent; }
+  .button-dark:hover:not(:disabled) { background: var(--color-primary-950); }
+  .button-lime:hover { background: var(--color-accent-400); }
+  .listing-card:hover,
+  .service-mini:hover { border-color: var(--color-border); box-shadow: none; }
+}
+
+.booking-gate {
+  max-width: 620px;
+  margin: clamp(24px, 8vh, 88px) auto;
+  padding: clamp(24px, 5vw, 48px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.booking-gate h2 { margin: 0 0 var(--space-3); color: var(--color-primary-950); }
+.booking-gate > p { color: var(--color-text-muted); line-height: var(--leading-body); }
+.booking-gate-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
+.booking-gate :where(button, a) { min-height: 48px; }
+.booking-gate .form-error { color: var(--color-danger); }
+.booking-main .stepper button { min-width: 44px; min-height: 48px; cursor: pointer; }
+.booking-main .stepper button[aria-disabled='true'] { cursor: default; }
+.booking-main .stepper button:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 3px; }
+.booking-panel [role='region']:focus { outline: none; }
+.booking-panel [role='region']:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 4px; }
+.booking-panel #booking-reason-help { color: var(--color-text-muted); font-size: var(--text-sm); font-weight: var(--weight-regular); line-height: var(--leading-body); }
+
+@media (max-width: 520px) {
+  .booking-gate-actions { flex-direction: column; }
+  .booking-gate-actions > * { width: 100%; }
+  .booking-main .stepper small { font-size: 9px; }
+}
